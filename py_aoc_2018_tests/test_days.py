@@ -3,6 +3,7 @@ import unittest
 import pytest
 
 from py_aoc_2018.day_1 import day_1
+from py_aoc_2018.day_2 import day_2
 
 
 class TestDay1(unittest.TestCase):
@@ -10,6 +11,11 @@ class TestDay1(unittest.TestCase):
         final_frequency, matching_frequency, _ = day_1()
         assert 578 == final_frequency
         assert 82516 == matching_frequency
+
+
+class TestDay2(unittest.TestCase):
+    def test(self):
+        assert 8820 == day_2()
 
 
 if __name__ == '__main__':

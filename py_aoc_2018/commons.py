@@ -15,3 +15,12 @@ def stream_lines_as_ints(f: TextIO) -> Generator[int, None, None]:
         if not line:
             break
         yield int(line)
+
+
+def stream_lines_as_str(f: TextIO) -> Generator[str, None, None]:
+    while True:
+        line = f.readline()
+        if not line:
+            break
+        yield str(line)
+
