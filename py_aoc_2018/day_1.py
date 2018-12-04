@@ -18,9 +18,27 @@ def stream_lines(f: TextIO) -> Generator[int, None, None]:
 
 
 def main():
-    with open(get_input_file_path(), 'r') as f:
-        frequency = sum(stream_lines(f))
-    print(f"Final frequency is {frequency}.")
+    final_frequency = None
+    frequency = 0
+    all_frequencies = {0: None}
+    matching_frequency = None
+    iteration_counter = 0
+
+    while not matching_frequency:
+        with open(get_input_file_path(), 'r') as f:
+            for e in stream_lines(f):
+                frequency += e
+                if not matching_frequency:
+                    if frequency in all_frequencies:
+                        matching_frequency = frequency
+                    else:
+                        all_frequencies[frequency] = None
+        if not final_frequency:
+            final_frequency = frequency
+            print(f"Final frequency is {final_frequency}.")
+        iteration_counter += 1
+
+    print(f"First matching frequency was {matching_frequency} and it took us just {iteration_counter} iterations.")
 
 
 if __name__ == '__main__':
