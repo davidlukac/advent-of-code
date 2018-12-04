@@ -1,20 +1,6 @@
-import os
-from typing import Generator, TextIO, Tuple
+from typing import Tuple
 
-
-def get_input_file_path() -> str:
-    return os.path.join(
-        os.path.realpath(os.path.dirname(__file__)),
-        'day_1_input.txt'
-    )
-
-
-def stream_lines(f: TextIO) -> Generator[int, None, None]:
-    while True:
-        line = f.readline()
-        if not line:
-            break
-        yield int(line)
+from py_aoc_2018.commons import get_input_file_path, stream_lines_as_ints
 
 
 def day_1() -> Tuple[int, int, int]:
@@ -25,8 +11,8 @@ def day_1() -> Tuple[int, int, int]:
     iteration_counter = 0
 
     while not matching_frequency:
-        with open(get_input_file_path(), 'r') as f:
-            for e in stream_lines(f):
+        with open(get_input_file_path(1), 'r') as f:
+            for e in stream_lines_as_ints(f):
                 frequency += e
                 if not matching_frequency:
                     if frequency in all_frequencies:
