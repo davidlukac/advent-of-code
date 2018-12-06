@@ -1,10 +1,11 @@
+import io
 import unittest
 
 import pytest
 
 from py_aoc_2018.day_1 import day_1
 from py_aoc_2018.day_2 import day_2, find_matching
-from py_aoc_2018.day_3 import Claim
+from py_aoc_2018.day_3 import Claim, load_claims
 
 
 class TestDay1(unittest.TestCase):
@@ -41,6 +42,16 @@ class TestDay2(unittest.TestCase):
 class TestDay3(unittest.TestCase):
     def test_claim_factory(self):
         assert Claim(1, 2, 3, 4, 5) == Claim.from_string('#1 @ 2,3: 4x5')
+        assert Claim(2, 2, 3, 4, 5) != Claim.from_string('#1 @ 2,3: 4x5')
+
+    def test_canvas_size(self):
+        data = [
+            '#1 @ 1,3: 4x4',
+            '#2 @ 3,1: 4x4',
+            '#3 @ 5,5: 2x2'
+        ]
+
+        assert 7, 1 == load_claims(io.StringIO('\n'.join(data)))
 
 
 if __name__ == '__main__':
