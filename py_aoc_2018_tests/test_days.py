@@ -51,7 +51,8 @@ class TestDay3(unittest.TestCase):
             '#3 @ 5,5: 2x2'
         ]
 
-        assert 7, 1 == load_claims(io.StringIO('\n'.join(data)))
+        stream = io.StringIO('\n'.join(data))
+        assert (7, 7) == load_claims(stream)[:-1]
 
 
 if __name__ == '__main__':
