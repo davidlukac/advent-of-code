@@ -5,7 +5,7 @@ import pytest
 
 from py_aoc_2018.day_1 import day_1
 from py_aoc_2018.day_2 import day_2, find_matching
-from py_aoc_2018.day_3 import Claim, load_claims
+from py_aoc_2018.day_3 import Claim, count_too_occupied, load_claims
 
 
 class TestDay1(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestDay1(unittest.TestCase):
 
 class TestDay2(unittest.TestCase):
     def test(self):
-        assert 8820 == day_2()
+        assert 8820 == day_2()[0]
 
     def test_matching(self):
         data = [
@@ -53,6 +53,59 @@ class TestDay3(unittest.TestCase):
 
         stream = io.StringIO('\n'.join(data))
         assert (7, 7) == load_claims(stream)[:-1]
+
+        data = [
+            '#1 @ 1,1: 3x2',
+            '#2 @ 2,1: 2x4',
+            '#3 @ 3,2: 5x2',
+            '#4 @ 5,3: 3x5'
+        ]
+
+        stream = io.StringIO('\n'.join(data))
+        assert (8, 8) == load_claims(stream)[:-1]
+
+    def test_claim_is_on(self):
+        c = Claim(1, 1, 1, 3, 2)
+        assert not c.is_on(0, 0)
+        assert not c.is_on(2, 0)
+        assert not c.is_on(4, 2)
+        assert not c.is_on(0, 2)
+        assert not c.is_on(2, 3)
+        assert not c.is_on(4, 4)
+
+        assert c.is_on(1, 1)
+        assert c.is_on(3, 2)
+
+        c = Claim.from_string('#3 @ 3,2: 5x2')
+        assert c.is_on(3, 2)
+        assert c.is_on(7, 2)
+        assert c.is_on(3, 3)
+        assert c.is_on(7, 3)
+        assert c.is_on(5, 3)
+
+    def test_count_too_occupied(self):
+        data = [
+            '#1 @ 1,3: 4x4',
+            '#2 @ 3,1: 4x4',
+            '#3 @ 5,5: 2x2'
+        ]
+
+        stream = io.StringIO('\n'.join(data))
+        size_x, size_y, claims = load_claims(stream)
+
+        assert 4 == count_too_occupied(size_x, size_y, claims)
+
+        data = [
+            '#1 @ 1,1: 3x2',
+            '#2 @ 2,1: 2x4',
+            '#3 @ 3,2: 5x2',
+            '#4 @ 5,3: 3x5'
+        ]
+
+        stream = io.StringIO('\n'.join(data))
+        size_x, size_y, claims = load_claims(stream)
+
+        assert count_too_occupied(size_x, size_y, claims) == 8
 
 
 if __name__ == '__main__':
