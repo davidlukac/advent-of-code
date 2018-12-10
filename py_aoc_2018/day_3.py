@@ -67,6 +67,7 @@ def optimize_claims(claims: Dict[int, Claim]) -> OrderedDict[int, Claim]:
 def count_too_occupied(size_x: int, size_y: int, claims: Dict[int, Claim], print_throttle: float = 5.0) -> int:
     too_occupied = 0
     it = 0
+    sq_checked = 0
     start_time = time.time()
     last_print = start_time
     throughput = 0.0
@@ -75,7 +76,9 @@ def count_too_occupied(size_x: int, size_y: int, claims: Dict[int, Claim], print
         t_row_start = time.time()
 
         for x in range(size_x):
+            sq_checked += 1
             xy_occupations = 0
+
             for cid in list(claims.keys()):
                 it += 1
 
@@ -89,7 +92,7 @@ def count_too_occupied(size_x: int, size_y: int, claims: Dict[int, Claim], print
                         print(f'Currently on {x}x{y} and found {too_occupied} over-claimed sq. inches. '
                               f'{len(claims)} claims remain in the list. '
                               f'Throughput is {throughput:.2f} sq.inch/s. '
-                              f'Checked {it} sq.inches so far.')
+                              f'Checked {sq_checked} sq.inches so far and {it} items in total.')
                         last_print = t
 
                 if y > claims[cid].y_max:
@@ -103,7 +106,7 @@ def count_too_occupied(size_x: int, size_y: int, claims: Dict[int, Claim], print
         throughput = size_x / (t_row_finish - t_row_start)
 
     end_time = time.time()
-    average_throughput = it / (end_time - start_time)
+    average_throughput = sq_checked / (end_time - start_time)
     print(f'Average throughput was {average_throughput} sq.inch/s. Checked {it:.2f} sq.inches total.')
 
     return too_occupied
@@ -114,7 +117,7 @@ def day_3() -> int:
         size_x, size_y, claims = load_claims(f)
     print(f'Loaded {len(claims)} claims; the canvas has size {size_x}x{size_y}.')
 
-    too_occupied = count_too_occupied(size_x, size_y, claims)
+    too_occupied = count_too_occupied(size_x, size_y, optimize_claims(claims))
 
     return too_occupied
 
