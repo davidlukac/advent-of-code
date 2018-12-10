@@ -5,7 +5,8 @@ import pytest
 
 from py_aoc_2018.day_1 import day_1
 from py_aoc_2018.day_2 import day_2, find_matching
-from py_aoc_2018.day_3 import Claim, count_too_occupied, load_claims
+from py_aoc_2018.day_3 import Claim, count_too_occupied, load_claims, optimize_claims
+from collections import OrderedDict
 
 
 class TestDay1(unittest.TestCase):
@@ -106,6 +107,29 @@ class TestDay3(unittest.TestCase):
         size_x, size_y, claims = load_claims(stream)
 
         assert count_too_occupied(size_x, size_y, claims) == 8
+
+    def test_sort(self):
+        data = [
+            '#1 @ 1,1: 3x2',
+            '#2 @ 2,1: 2x4',
+            '#3 @ 3,2: 5x2',
+            '#4 @ 5,3: 3x5'
+        ]
+
+        stream = io.StringIO('\n'.join(data))
+        _, _, claims = load_claims(stream)
+
+        claim_ordered = optimize_claims(claims)
+
+        claims_ordered_expected = OrderedDict({
+            2: Claim.from_string('#2 @ 2,1: 2x4'),
+            1: Claim.from_string('#1 @ 1,1: 3x2'),
+            4: Claim.from_string('#4 @ 5,3: 3x5'),
+            3: Claim.from_string('#3 @ 3,2: 5x2')
+        })
+
+        for c_actual, c_expected in zip(claim_ordered.values(), claims_ordered_expected.values()):
+            assert c_actual == c_expected
 
 
 if __name__ == '__main__':

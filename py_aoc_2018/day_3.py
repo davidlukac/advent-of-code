@@ -1,4 +1,5 @@
 from __future__ import annotations
+from collections import OrderedDict
 
 import time
 from typing import Dict, TextIO, Tuple
@@ -28,6 +29,9 @@ class Claim:
         else:
             return False
 
+    def __repr__(self) -> str:
+        return f'#{self.cid} @ {self.x},{self.y}: {self.size_x}x{self.size_y}'
+
     @staticmethod
     def from_string(s: str) -> Claim:
         # #1316 @ 818,356: 13x14
@@ -56,9 +60,15 @@ def load_claims(f: TextIO) -> Tuple[int, int, Dict[int, Claim]]:
     return size_x + 1, size_y + 1, claims
 
 
+def optimize_claims(claims: Dict[int, Claim]) -> OrderedDict[int, Claim]:
+    return OrderedDict({c.cid: c for c in sorted(claims.values(), key=lambda claim: claim.x)})
+
+
 def count_too_occupied(size_x: int, size_y: int, claims: Dict[int, Claim], print_throttle: float = 5.0) -> int:
     too_occupied = 0
-    last_print = time.time()
+    it = 0
+    start_time = time.time()
+    last_print = start_time
     throughput = 0.0
 
     for y in range(size_y):
@@ -67,15 +77,20 @@ def count_too_occupied(size_x: int, size_y: int, claims: Dict[int, Claim], print
         for x in range(size_x):
             xy_occupations = 0
             for cid in list(claims.keys()):
+                it += 1
+
                 if claims[cid].is_on(x, y):
                     xy_occupations += 1
 
-                t = time.time()
-                if t - last_print >= print_throttle:
-                    print(f'Currently on {x}x{y} and found {too_occupied} over-claimed sq. inches. '
-                          f'{len(claims)} claims remain in the list. '
-                          f'Throughput is {throughput:.2f} sq.inch/s.')
-                    last_print = t
+                # Throttle the throttle checking.
+                if it % 100 == 0:
+                    t = time.time()
+                    if t - last_print >= print_throttle:
+                        print(f'Currently on {x}x{y} and found {too_occupied} over-claimed sq. inches. '
+                              f'{len(claims)} claims remain in the list. '
+                              f'Throughput is {throughput:.2f} sq.inch/s. '
+                              f'Checked {it} sq.inches so far.')
+                        last_print = t
 
                 if y > claims[cid].y_max:
                     claims.pop(cid)
@@ -86,6 +101,10 @@ def count_too_occupied(size_x: int, size_y: int, claims: Dict[int, Claim], print
 
         t_row_finish = time.time()
         throughput = size_x / (t_row_finish - t_row_start)
+
+    end_time = time.time()
+    average_throughput = it / (end_time - start_time)
+    print(f'Average throughput was {average_throughput} sq.inch/s. Checked {it:.2f} sq.inches total.')
 
     return too_occupied
 
