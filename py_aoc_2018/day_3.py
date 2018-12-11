@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 import time
 from collections import OrderedDict
 from operator import attrgetter
@@ -65,26 +66,94 @@ def optimize_claims(claims: Dict[int, Claim]) -> OrderedDict[int, Claim]:
     return OrderedDict({c.cid: c for c in sorted(claims.values(), key=attrgetter('x', 'y_max'))})
 
 
-def count_too_occupied(size_x: int, size_y: int, claims: Dict[int, Claim], print_throttle: float = 5.0) -> int:
-    too_occupied = 0
-    it = 0
-    sq_checked = 0
-    start_time = time.time()
-    last_print = start_time
-    throughput = 0.0
+class LogThrottling(metaclass=abc.ABCMeta):
+    log_throttle = 5.0
 
-    for y in range(size_y):
-        t_row_start = time.time()
+    @abc.abstractmethod
+    def set_log_throttle(self, print_throttle):
+        pass
 
-        for x in range(size_x):
-            sq_checked += 1
-            xy_occupations = 0
 
-            for cid in list(claims.keys()):
-                it += 1
+class OverclaimedCounter(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def __init__(self, size_x: int, size_y: int, claims: Dict[int, Claim]) -> None:
+        self.size_x = size_x
+        self.size_y = size_y
+        self.claims = claims
 
-                if claims[cid].is_on(x, y):
-                    xy_occupations += 1
+    @abc.abstractmethod
+    def count_too_occupied(self) -> int:
+        pass
+
+
+class SquareBySquareOverclaimedCounter(OverclaimedCounter, LogThrottling):
+    def __init__(self, size_x: int, size_y: int, claims: Dict[int, Claim]) -> None:
+        super().__init__(size_x, size_y, claims)
+
+    def count_too_occupied(self) -> int:
+        too_occupied = 0
+        it = 0
+        sq_checked = 0
+        start_time = time.time()
+        last_print = start_time
+        throughput = 0.0
+
+        for y in range(self.size_y):
+            t_row_start = time.time()
+
+            for x in range(self.size_x):
+                sq_checked += 1
+                xy_occupations = 0
+
+                for cid in list(self.claims.keys()):
+                    it += 1
+
+                    if self.claims[cid].is_on(x, y):
+                        xy_occupations += 1
+
+                    # Throttle the throttle checking.
+                    if it % 100 == 0:
+                        t = time.time()
+                        if t - last_print >= self.log_throttle:
+                            print(f'Currently on {x}x{y} and found {too_occupied} over-claimed sq. inches. '
+                                  f'{len(self.claims)} claims remain in the list. '
+                                  f'Throughput is {throughput:.2f} sq.inch/s. '
+                                  f'Checked {sq_checked} sq.inches so far and {it} items in total.')
+                            last_print = t
+
+                    if y > self.claims[cid].y_max:
+                        self.claims.pop(cid)
+
+                    if xy_occupations == 2:
+                        too_occupied += 1
+                        break
+
+            for cid in list(self.claims.keys()):
+                if y > self.claims[cid].y_max:
+                    self.claims.pop(cid)
+
+            t_row_finish = time.time()
+            t_delta = t_row_finish - t_row_start
+            if t_delta > 0:
+                throughput = self.size_x / t_delta
+            else:
+                throughput = -1
+
+        end_time = time.time()
+        t_delta = end_time - start_time
+        if t_delta > 0:
+            average_throughput = sq_checked / t_delta
+        else:
+            average_throughput = -1
+        print(f'Average throughput was {average_throughput:.2f} sq.inch/s. '
+              f'Checked {sq_checked} sq.inches and {it} items in total.')
+
+        return too_occupied
+
+    def set_log_throttle(self, log_throttle: float):
+        self.log_throttle = log_throttle
+
+
 
                 # Throttle the throttle checking.
                 if it % 100 == 0:

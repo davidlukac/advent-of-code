@@ -6,7 +6,8 @@ import pytest
 
 from py_aoc_2018.day_1 import day_1
 from py_aoc_2018.day_2 import day_2, find_matching
-from py_aoc_2018.day_3 import Claim, count_too_occupied, load_claims, optimize_claims
+from py_aoc_2018.day_3 import Claim, load_claims, optimize_claims, SquareBySquareOverclaimedCounter
+from py_aoc_2018.day_3 import count_too_occupied_2
 
 
 class TestDay1(unittest.TestCase):
@@ -94,7 +95,8 @@ class TestDay3(unittest.TestCase):
         stream = io.StringIO('\n'.join(data))
         size_x, size_y, claims = load_claims(stream)
 
-        assert 4 == count_too_occupied(size_x, size_y, claims)
+        counter = SquareBySquareOverclaimedCounter(size_x, size_y, optimize_claims(claims))
+        assert 4 == counter.count_too_occupied()
 
         data = [
             '#1 @ 1,1: 3x2',
@@ -106,7 +108,8 @@ class TestDay3(unittest.TestCase):
         stream = io.StringIO('\n'.join(data))
         size_x, size_y, claims = load_claims(stream)
 
-        assert count_too_occupied(size_x, size_y, claims) == 8
+        counter = SquareBySquareOverclaimedCounter(size_x, size_y, optimize_claims(claims))
+        assert counter.count_too_occupied() == 8
 
     def test_sort(self):
         data = [
