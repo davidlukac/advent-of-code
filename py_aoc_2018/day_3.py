@@ -154,45 +154,65 @@ class SquareBySquareOverclaimedCounter(OverclaimedCounter, LogThrottling):
         self.log_throttle = log_throttle
 
 
+class ClaimsOverlap:
+    def __init__(self, c1: Claim, c2: Claim) -> None:
+        super().__init__()
+        self.c1 = c1
+        self.c2 = c2
+        self._is_overlap_on_x = None
+        self._overlap_on_x = None
+        self._is_overlap_on_y = None
+        self._overlap_on_y = None
 
-                # Throttle the throttle checking.
-                if it % 100 == 0:
-                    t = time.time()
-                    if t - last_print >= print_throttle:
-                        print(f'Currently on {x}x{y} and found {too_occupied} over-claimed sq. inches. '
-                              f'{len(claims)} claims remain in the list. '
-                              f'Throughput is {throughput:.2f} sq.inch/s. '
-                              f'Checked {sq_checked} sq.inches so far and {it} items in total.')
-                        last_print = t
+    @property
+    def is_overlap_on_x(self) -> bool:
+        if self._is_overlap_on_x is None:
+            c1 = self.c1
+            c2 = self.c2
 
-                if y > claims[cid].y_max:
-                    claims.pop(cid)
+            if c2.x < c1.x:
+                c1, c2 = c2, c1
 
-                if xy_occupations == 2:
-                    too_occupied += 1
-                    break
+            if c2.x <= c1.x_max:
+                self._overlap_on_x = max(c1.x, c2.x), min(c1.x_max, c2.x_max)
+                self._is_overlap_on_x = True
+            else:
+                self._is_overlap_on_x = False
 
-        for cid in list(claims.keys()):
-            if y > claims[cid].y_max:
-                claims.pop(cid)
+        return self._is_overlap_on_x
 
-        t_row_finish = time.time()
-        t_delta = t_row_finish - t_row_start
-        if t_delta > 0:
-            throughput = size_x / t_delta
+    @property
+    def overlap_on_x(self) -> Union[Tuple[int, int], None]:
+        if self.is_overlap_on_x:
+            return self._overlap_on_x
         else:
-            throughput = -1
+            return None
 
-    end_time = time.time()
-    t_delta = end_time - start_time
-    if t_delta > 0:
-        average_throughput = sq_checked / t_delta
-    else:
-        average_throughput = -1
-    print(f'Average throughput was {average_throughput:.2f} sq.inch/s. '
-          f'Checked {sq_checked} sq.inches and {it} items in total.')
+    @property
+    def is_overlap_on_y(self) -> bool:
+        if self._is_overlap_on_y is None:
+            c1 = self.c1
+            c2 = self.c2
 
-    return too_occupied
+            if c2.y < c1.y:
+                c1, c2 = c2, c1
+
+            if c2.y <= c1.y_max:
+                self._overlap_on_y = max(c1.y, c2.y), min(c1.y_max, c2.y_max)
+                self._is_overlap_on_y = True
+            else:
+                self._is_overlap_on_y = False
+
+        return self._is_overlap_on_y
+
+    @property
+    def overlap_on_y(self) -> Union[Tuple[int, int], None]:
+        if self.is_overlap_on_y:
+            return self._overlap_on_y
+        else:
+            return None
+
+
 
 
 def day_3() -> int:

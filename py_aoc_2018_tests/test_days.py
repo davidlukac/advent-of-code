@@ -136,6 +136,48 @@ class TestDay3(unittest.TestCase):
         for c_actual, c_expected in zip(claim_ordered.values(), claims_ordered_expected.values()):
             assert c_actual == c_expected
 
+    def test_claims_overlap(self):
+        c1 = Claim(1, 1, 1, 5, 5)
+        c2 = Claim(2, 3, 3, 10, 10)
+
+        assert ClaimsOverlap(c1, c2).overlap_on_x == (3, 5)
+        assert ClaimsOverlap(c1, c2).is_overlap_on_x
+
+        c1 = Claim(1, 0, 0, 1, 1)
+        c2 = Claim(2, 0, 0, 1, 1)
+
+        assert ClaimsOverlap(c1, c2).overlap_on_x == (0, 0)
+        assert ClaimsOverlap(c1, c2).is_overlap_on_x
+
+        c1 = Claim(1, 1, 1, 5, 5)
+        c2 = Claim(2, 6, 6, 10, 10)
+
+        assert not ClaimsOverlap(c1, c2).overlap_on_x
+        assert not ClaimsOverlap(c1, c2).is_overlap_on_x
+
+        c1 = Claim(1, 1, 1, 5, 5)
+        c2 = Claim(2, 3, 3, 10, 10)
+
+        assert ClaimsOverlap(c1, c2).overlap_on_y == (3, 5)
+        assert ClaimsOverlap(c1, c2).is_overlap_on_y
+
+        c1 = Claim(1, 1, 1, 5, 5)
+        c2 = Claim(2, 3, 3, 10, 10)
+
+        assert ClaimsOverlap(c2, c1).overlap_on_y == (3, 5)
+        assert ClaimsOverlap(c2, c1).is_overlap_on_y
+
+        c1 = Claim(1, 0, 0, 1, 1)
+        c2 = Claim(2, 0, 0, 1, 1)
+
+        assert ClaimsOverlap(c1, c2).overlap_on_y == (0, 0)
+        assert ClaimsOverlap(c1, c2).is_overlap_on_y
+
+        c1 = Claim(1, 1, 1, 5, 5)
+        c2 = Claim(2, 6, 6, 10, 10)
+
+        assert not ClaimsOverlap(c1, c2).overlap_on_y
+
 
 if __name__ == '__main__':
     pytest.main()
