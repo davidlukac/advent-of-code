@@ -108,10 +108,18 @@ def count_too_occupied(size_x: int, size_y: int, claims: Dict[int, Claim], print
                 claims.pop(cid)
 
         t_row_finish = time.time()
-        throughput = size_x / (t_row_finish - t_row_start)
+        t_delta = t_row_finish - t_row_start
+        if t_delta > 0:
+            throughput = size_x / t_delta
+        else:
+            throughput = -1
 
     end_time = time.time()
-    average_throughput = sq_checked / (end_time - start_time)
+    t_delta = end_time - start_time
+    if t_delta > 0:
+        average_throughput = sq_checked / t_delta
+    else:
+        average_throughput = -1
     print(f'Average throughput was {average_throughput:.2f} sq.inch/s. '
           f'Checked {sq_checked} sq.inches and {it} items in total.')
 
