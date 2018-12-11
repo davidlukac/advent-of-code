@@ -4,7 +4,7 @@ import abc
 import time
 from collections import OrderedDict
 from operator import attrgetter
-from typing import Dict, TextIO, Tuple
+from typing import Dict, TextIO, Tuple, List, Union
 
 from py_aoc_2018.commons import get_input_file_path, stream_lines_as_str
 
@@ -213,6 +213,56 @@ class ClaimsOverlap:
             return None
 
 
+class IterateClaimsOverclaimedCounter(OverclaimedCounter):
+    def __init__(self, size_x: int, size_y: int, claims: Dict[int, Claim]) -> None:
+        super().__init__(size_x, size_y, claims)
+        self.claims_list = list(self.claims.values())  # type: List[Claim]
+        self.claims_len = len(self.claims_list)
+
+    def count_too_occupied(self) -> int:
+        t_start = time.time()
+
+        overlapping = {}
+
+        for idx_l in range(self.claims_len):
+            claim_l = self.claims_list[idx_l]
+
+            for idx_r in range(idx_l + 1, self.claims_len):
+                claim_r = self.claims_list[idx_r]
+
+                overlap = ClaimsOverlap(claim_l, claim_r)
+
+                if overlap.is_overlap_on_x and overlap.is_overlap_on_y:
+                    overlapping[overlap] = overlap.overlap_on_y
+                else:
+                    # If the 'next' claim doesn't overlap, we don't need to continue.
+                    # break
+                    pass
+
+        overlaps_map = dict()
+
+        for overlap, overlap_y in overlapping.items():
+            x_start = overlap.overlap_on_x[0]
+            x_end = overlap.overlap_on_x[1] + 1
+            y_start = overlap_y[0]
+            y_end = overlap_y[1] + 1
+            for x in range(x_start, x_end):
+                overlaps_map[x] = list(set(overlaps_map.get(x, []) + list(range(y_start, y_end))))
+
+        overclaimed = len([item for sublist in overlaps_map.values() for item in sublist])
+
+        t_end = time.time()
+        delta = t_end - t_start
+        if delta > 0:
+            sq_in_throughput = self.size_x * self.size_y / delta
+            claim_throughput = self.claims_len / delta
+        else:
+            sq_in_throughput = -1
+            claim_throughput = -1
+
+        print(f'Throughput: {sq_in_throughput:.2f} sq.inches/s and {claim_throughput:.2f} claims/s.')
+
+        return overclaimed
 
 
 def day_3() -> int:
@@ -220,7 +270,8 @@ def day_3() -> int:
         size_x, size_y, claims = load_claims(f)
     print(f'Loaded {len(claims)} claims; the canvas has size {size_x}x{size_y}.')
 
-    too_occupied = count_too_occupied(size_x, size_y, optimize_claims(claims))
+    # too_occupied = SquareBySquareOverclaimedCounter(size_x, size_y, optimize_claims(claims)).count_too_occupied()
+    too_occupied = IterateClaimsOverclaimedCounter(size_x, size_y, optimize_claims(claims)).count_too_occupied()
 
     return too_occupied
 

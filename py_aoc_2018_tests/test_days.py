@@ -7,7 +7,7 @@ import pytest
 from py_aoc_2018.day_1 import day_1
 from py_aoc_2018.day_2 import day_2, find_matching
 from py_aoc_2018.day_3 import Claim, load_claims, optimize_claims, SquareBySquareOverclaimedCounter
-from py_aoc_2018.day_3 import count_too_occupied_2
+from py_aoc_2018.day_3 import IterateClaimsOverclaimedCounter, ClaimsOverlap
 
 
 class TestDay1(unittest.TestCase):
@@ -99,6 +99,17 @@ class TestDay3(unittest.TestCase):
         assert 4 == counter.count_too_occupied()
 
         data = [
+            '#1 @ 1,3: 4x4',
+            '#2 @ 3,1: 4x4',
+            '#3 @ 5,5: 2x2'
+        ]
+
+        stream = io.StringIO('\n'.join(data))
+        size_x, size_y, claims = load_claims(stream)
+
+        assert 4 == IterateClaimsOverclaimedCounter(size_x, size_y, optimize_claims(claims)).count_too_occupied()
+
+        data = [
             '#1 @ 1,1: 3x2',
             '#2 @ 2,1: 2x4',
             '#3 @ 3,2: 5x2',
@@ -110,6 +121,18 @@ class TestDay3(unittest.TestCase):
 
         counter = SquareBySquareOverclaimedCounter(size_x, size_y, optimize_claims(claims))
         assert counter.count_too_occupied() == 8
+
+        data = [
+            '#1 @ 1,1: 3x2',
+            '#2 @ 2,1: 2x4',
+            '#3 @ 3,2: 5x2',
+            '#4 @ 5,3: 3x5'
+        ]
+
+        stream = io.StringIO('\n'.join(data))
+        size_x, size_y, claims = load_claims(stream)
+
+        assert IterateClaimsOverclaimedCounter(size_x, size_y, optimize_claims(claims)).count_too_occupied() == 8
 
     def test_sort(self):
         data = [
