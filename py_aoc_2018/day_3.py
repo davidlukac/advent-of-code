@@ -4,7 +4,7 @@ import abc
 import time
 from collections import OrderedDict, defaultdict
 from operator import attrgetter
-from typing import Dict, TextIO, Tuple, List, Union, Set
+from typing import Dict, List, Set, TextIO, Tuple, Union
 
 from py_aoc_2018.commons import get_input_file_path, stream_lines_as_str
 
@@ -250,6 +250,7 @@ class IterateClaimsOverclaimedCounter(OverclaimedCounter):
             x_end = overlap_tuple[1] + 1
             y_start = overlap_y[0]
             y_end = overlap_y[1] + 1
+
             for x in range(x_start, x_end):
                 overlaps_map[x].update(range(y_start, y_end))
 
