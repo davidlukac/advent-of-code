@@ -218,11 +218,13 @@ class IterateClaimsOverclaimedCounter(OverclaimedCounter):
         super().__init__(size_x, size_y, claims)
         self.claims_list = list(self.claims.values())  # type: List[Claim]
         self.claims_len = len(self.claims_list)
+        self.claim_ids_not_overlapping = set(self.claims.keys())
 
     def count_too_occupied(self) -> int:
         t_start = time.time()
 
         overlapping = {}
+        overlapping_ids = set()
 
         for idx_l in range(self.claims_len):
             claim_l = self.claims_list[idx_l]
@@ -234,6 +236,8 @@ class IterateClaimsOverclaimedCounter(OverclaimedCounter):
 
                 if claim_l.x_max >= claim_r.x:
                     if overlap.is_overlap_on_x and overlap.is_overlap_on_y:
+                        overlapping_ids.add(claim_l.cid)
+                        overlapping_ids.add(claim_r.cid)
                         overlapping[
                             overlap.overlap_on_x[0],
                             overlap.overlap_on_x[1],
@@ -265,7 +269,10 @@ class IterateClaimsOverclaimedCounter(OverclaimedCounter):
             sq_in_throughput = -1
             claim_throughput = -1
 
+        self.claim_ids_not_overlapping = self.claim_ids_not_overlapping.difference(overlapping_ids)
+
         print(f'Throughput: {sq_in_throughput:.2f} sq.inches/s and {claim_throughput:.2f} claims/s.')
+        print(f'Not overlapping claims are: {self.claim_ids_not_overlapping}.')
 
         return overclaimed
 
