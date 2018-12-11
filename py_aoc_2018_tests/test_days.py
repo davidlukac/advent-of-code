@@ -1,12 +1,12 @@
 import io
 import unittest
+from collections import OrderedDict
 
 import pytest
 
 from py_aoc_2018.day_1 import day_1
 from py_aoc_2018.day_2 import day_2, find_matching
 from py_aoc_2018.day_3 import Claim, count_too_occupied, load_claims, optimize_claims
-from collections import OrderedDict
 
 
 class TestDay1(unittest.TestCase):
@@ -110,10 +110,11 @@ class TestDay3(unittest.TestCase):
 
     def test_sort(self):
         data = [
-            '#1 @ 1,1: 3x2',
+            '#4 @ 3,2: 5x5',
             '#2 @ 2,1: 2x4',
+            '#5 @ 5,3: 3x5',
             '#3 @ 3,2: 5x2',
-            '#4 @ 5,3: 3x5'
+            '#1 @ 1,1: 3x2',
         ]
 
         stream = io.StringIO('\n'.join(data))
@@ -122,10 +123,11 @@ class TestDay3(unittest.TestCase):
         claim_ordered = optimize_claims(claims)
 
         claims_ordered_expected = OrderedDict({
-            2: Claim.from_string('#2 @ 2,1: 2x4'),
             1: Claim.from_string('#1 @ 1,1: 3x2'),
-            4: Claim.from_string('#4 @ 5,3: 3x5'),
-            3: Claim.from_string('#3 @ 3,2: 5x2')
+            2: Claim.from_string('#2 @ 2,1: 2x4'),
+            3: Claim.from_string('#3 @ 3,2: 5x2'),
+            4: Claim.from_string('#4 @ 3,2: 5x5'),
+            5: Claim.from_string('#5 @ 5,3: 3x5'),
         })
 
         for c_actual, c_expected in zip(claim_ordered.values(), claims_ordered_expected.values()):

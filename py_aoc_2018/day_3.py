@@ -1,7 +1,8 @@
 from __future__ import annotations
-from collections import OrderedDict
 
 import time
+from collections import OrderedDict
+from operator import attrgetter
 from typing import Dict, TextIO, Tuple
 
 from py_aoc_2018.commons import get_input_file_path, stream_lines_as_str
@@ -61,7 +62,7 @@ def load_claims(f: TextIO) -> Tuple[int, int, Dict[int, Claim]]:
 
 
 def optimize_claims(claims: Dict[int, Claim]) -> OrderedDict[int, Claim]:
-    return OrderedDict({c.cid: c for c in sorted(claims.values(), key=lambda claim: claim.x)})
+    return OrderedDict({c.cid: c for c in sorted(claims.values(), key=attrgetter('x', 'y_max'))})
 
 
 def count_too_occupied(size_x: int, size_y: int, claims: Dict[int, Claim], print_throttle: float = 5.0) -> int:
@@ -102,12 +103,17 @@ def count_too_occupied(size_x: int, size_y: int, claims: Dict[int, Claim], print
                     too_occupied += 1
                     break
 
+        for cid in list(claims.keys()):
+            if y > claims[cid].y_max:
+                claims.pop(cid)
+
         t_row_finish = time.time()
         throughput = size_x / (t_row_finish - t_row_start)
 
     end_time = time.time()
     average_throughput = sq_checked / (end_time - start_time)
-    print(f'Average throughput was {average_throughput} sq.inch/s. Checked {it:.2f} sq.inches total.')
+    print(f'Average throughput was {average_throughput:.2f} sq.inch/s. '
+          f'Checked {sq_checked} sq.inches and {it} items in total.')
 
     return too_occupied
 
@@ -122,6 +128,10 @@ def day_3() -> int:
     return too_occupied
 
 
-if __name__ == '__main__':
+def main():
     res_too_occupied = day_3()
     print(f"There are {res_too_occupied} sq. inches with 2+ claims.")
+
+
+if __name__ == '__main__':
+    main()
