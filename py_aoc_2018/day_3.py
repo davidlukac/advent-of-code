@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import abc
 import time
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from operator import attrgetter
-from typing import Dict, TextIO, Tuple, List, Union
+from typing import Dict, TextIO, Tuple, List, Union, Set
 
 from py_aoc_2018.commons import get_input_file_path, stream_lines_as_str
 
@@ -232,22 +232,26 @@ class IterateClaimsOverclaimedCounter(OverclaimedCounter):
 
                 overlap = ClaimsOverlap(claim_l, claim_r)
 
-                if overlap.is_overlap_on_x and overlap.is_overlap_on_y:
-                    overlapping[overlap] = overlap.overlap_on_y
+                if claim_l.x_max >= claim_r.x:
+                    if overlap.is_overlap_on_x and overlap.is_overlap_on_y:
+                        overlapping[
+                            overlap.overlap_on_x[0],
+                            overlap.overlap_on_x[1],
+                            (overlap.c1.cid, overlap.c2.cid)
+                        ] = overlap.overlap_on_y
                 else:
                     # If the 'next' claim doesn't overlap, we don't need to continue.
-                    # break
-                    pass
+                    break
 
-        overlaps_map = dict()
+        overlaps_map = defaultdict(set)  # type: defaultdict[int, Set[int]]
 
-        for overlap, overlap_y in overlapping.items():
-            x_start = overlap.overlap_on_x[0]
-            x_end = overlap.overlap_on_x[1] + 1
+        for overlap_tuple, overlap_y in overlapping.items():
+            x_start = overlap_tuple[0]
+            x_end = overlap_tuple[1] + 1
             y_start = overlap_y[0]
             y_end = overlap_y[1] + 1
             for x in range(x_start, x_end):
-                overlaps_map[x] = list(set(overlaps_map.get(x, []) + list(range(y_start, y_end))))
+                overlaps_map[x].update(range(y_start, y_end))
 
         overclaimed = len([item for sublist in overlaps_map.values() for item in sublist])
 
