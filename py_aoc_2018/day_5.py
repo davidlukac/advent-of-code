@@ -43,11 +43,30 @@ def reduce(s: str) -> str:
     return result
 
 
+def find_optimize(in_str: str) -> str:
+    shortest_str = in_str
+    shortest_len = len(in_str)
+
+    for s in sorted(set(in_str.lower())):  # type: str
+        print(f'Trying with {s.lower()}/{s.upper()}...', end='')
+        in_alt = in_str.replace(s.lower(), '').replace(s.upper(), '')
+        reduced_str = reduce(in_alt)
+        reduced_len = len(reduced_str)
+        print(f' reduced to {reduced_len} characters.')
+
+        if reduced_len < shortest_len:
+            shortest_str = reduced_str
+            shortest_len = reduced_len
+
+    return shortest_str
+
+
 def main():
     with open(get_input_file_path(5), 'r') as f:
         in_str = f.readline().strip()
 
-    print(f'Result is: {len(reduce(in_str))}.')
+    print(f'1st result is: {len(reduce(in_str))}.')
+    print(f'2nd result is: {len(find_optimize(in_str))}.')
 
 
 if __name__ == '__main__':
