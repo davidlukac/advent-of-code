@@ -1,11 +1,12 @@
 import io
 import unittest
+from collections import defaultdict
 from datetime import date, datetime
 
 import pytest
 
 from py_aoc_2018.commons import stream_lines_as_str
-from py_aoc_2018.day_4 import Guard, RawEvent, Sleep, process_str_events
+from py_aoc_2018.day_4 import Guard, RawEvent, Sleep, process_raw_events, process_str_events
 
 
 class TestSleep(unittest.TestCase):
@@ -50,8 +51,25 @@ class TestSleep(unittest.TestCase):
         assert s.end == 58
         assert s.minutes == 3
 
+    def test_sleep_equals(self):
+        s1 = Sleep(date(2015, 12, 3), 12)
+        s2 = Sleep(date(2015, 12, 3), 12)
+        assert s1 == s2
 
-class TestDay4(unittest.TestCase):
+        s1 = Sleep(date(2015, 12, 3), 12)
+        s2 = Sleep(date(2015, 12, 3), 13)
+        assert s1 != s2
+
+        s1 = Sleep(date(2015, 12, 3), 12)
+        s2 = Sleep(date(2015, 12, 3), 12, 59)
+        assert s1 != s2
+
+        s1 = Sleep(date(2015, 12, 3), 12, 20)
+        s2 = Sleep(date(2015, 12, 3), 12, 20)
+        assert s1 == s2
+
+
+class TestRawEvent(unittest.TestCase):
     def test_raw_event(self):
         re = RawEvent.from_string('[1518-11-01 00:00] Guard #10 begins shift')
         assert re.dt == datetime(1518, 11, 1, 0, 0)
@@ -111,6 +129,8 @@ class TestDay4(unittest.TestCase):
         assert len(expected) == len(sorted_events)
         assert sorted_events == expected
 
+
+class TestGuard(unittest.TestCase):
     def test_guard(self):
         g1 = Guard(10)
         g2 = Guard(10)
@@ -140,6 +160,36 @@ class TestDay4(unittest.TestCase):
         g1 = Guard.from_string(' Guard #2083 begins shift')
         assert Guard(2083) == g1
         assert g1.gid == 2083
+
+
+class TestDay4(unittest.TestCase):
+    def test(self):
+        r1 = RawEvent.from_string('[1518-11-01 00:00] Guard #10 begins shift')
+        r2 = RawEvent.from_string('[1518-11-01 00:05] falls asleep')
+        r3 = RawEvent.from_string('[1518-11-01 00:25] wakes up')
+        r4 = RawEvent.from_string('[1518-11-01 00:30] falls asleep')
+        r5 = RawEvent.from_string('[1518-11-01 00:55] wakes up')
+        r6 = RawEvent.from_string('[1518-11-02 23:58] Guard #99 begins shift')
+        r7 = RawEvent.from_string('[1518-11-03 00:40] falls asleep')
+        r8 = RawEvent.from_string('[1518-11-03 00:50] wakes up')
+        r9 = RawEvent.from_string('[1518-11-03 23:58] Guard #999 begins shift')
+
+        res = process_raw_events([r1, r2, r3, r4, r5, r6, r7, r8, r9])
+
+        g10 = Guard(10)
+        g99 = Guard(99)
+        g999 = Guard(999)
+
+        s1 = Sleep(date(1518, 11, 1), 5, 25)
+        s2 = Sleep(date(1518, 11, 1), 30, 55)
+        s3 = Sleep(date(1518, 11, 3), 40, 50)
+
+        d = defaultdict(list)
+        d[g10] = [s1, s2]
+        d[g99] = [s3]
+        d[g999] = []
+
+        assert res == d
 
 
 if __name__ == '__main__':

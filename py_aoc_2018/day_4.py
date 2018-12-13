@@ -76,6 +76,12 @@ class Sleep:
             sleep.end = dt.minute
             return sleep
 
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, Sleep):
+            return o.__dict__ == self.__dict__
+
+        return False
+
 
 class RawEvent:
     """
@@ -107,11 +113,46 @@ class RawEvent:
         return RawEvent(datetime.strptime(s[0:18], cls.DT_FORMAT), s[19:].strip())
 
 
+class ItemFactory:
+    @staticmethod
+    def construct(e: RawEvent, s: Sleep = None) -> Union[Guard, Sleep, None]:
+        if e.raw_event.startswith('Guard'):
+            return Guard.from_string(e.raw_event)
+        elif e.raw_event.startswith('falls'):
+            return Sleep.construct(e.dt, e.raw_event)
+        elif e.raw_event.startswith('wakes'):
+            assert s
+            return Sleep.construct(e.dt, e.raw_event, s)
+        return None
 
 
+def process_str_events(events: Generator[str]) -> List[RawEvent]:
+    return sorted((RawEvent.from_string(e) for e in events if e.strip()), key=attrgetter('dt'))
 
-def load_events(f) -> Generator[str]:
-    stream_lines_as_str(f)
+
+def process_raw_events(events: List[RawEvent]) -> defaultdict[Guard, List[Sleep]]:
+    guard_sleeps = defaultdict(list)  # type: defaultdict[Guard, List[Sleep]]
+
+    last_guard = None  # type: Guard
+    last_sleep = None  # type: Sleep
+
+    for e in events:
+        if last_sleep and last_sleep.is_finished:
+            # Reset last finished sleep.
+            last_sleep = None
+
+        item = ItemFactory.construct(e, last_sleep)
+
+        if isinstance(item, Guard):
+            _ = guard_sleeps[item]
+            last_guard = item
+
+        elif isinstance(item, Sleep) and not item.is_finished:
+            guard_sleeps[last_guard].append(item)
+            last_sleep = item
+
+    return guard_sleeps
+
 
 def day_4():
     with open(get_input_file_path(4), 'r') as f:
