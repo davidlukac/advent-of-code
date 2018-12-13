@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import date, datetime
 from operator import attrgetter
-from typing import Generator, List, Union
+from typing import Generator, List, Tuple, Union
 
 from py_aoc_2018.commons import get_input_file_path, stream_lines_as_str
 
@@ -26,6 +26,9 @@ class Guard:
 
     def __hash__(self) -> int:
         return hash(self.gid)
+
+    def __repr__(self) -> str:
+        return f'Guard #{self.gid}'
 
 
 class Sleep:
@@ -154,18 +157,54 @@ def process_raw_events(events: List[RawEvent]) -> defaultdict[Guard, List[Sleep]
     return guard_sleeps
 
 
-def day_4():
+def calculate_weakness(sleeps: List[Sleep]) -> Tuple[int, Union[int, None]]:
+    total_minutes = 0
+    favourite_minute = None
+
+    c = Counter()
+
+    for s in sleeps:
+        total_minutes += s.minutes
+        c.update(range(s.start, s.end))
+
+    most_common = c.most_common(1)
+    if most_common:
+        favourite_minute = most_common.pop()[0]
+
+    return total_minutes, favourite_minute
+
+
+def find_best_guard(guard_sleeps: defaultdict[Guard, List[Sleep]]) -> Tuple[Guard, int, int]:
+    total_minutes = 0
+    best_guard = None
+    best_minute = 0
+
+    for guard, sleeps in guard_sleeps.items():
+        minutes, minute = calculate_weakness(sleeps)
+        if minutes > total_minutes:
+            total_minutes = minutes
+            best_guard = guard
+            best_minute = minute
+
+    return best_guard, total_minutes, best_minute
+
+
+def day_4() -> int:
     with open(get_input_file_path(4), 'r') as f:
         events = stream_lines_as_str(f)
+        events = process_str_events(events)
 
-    for e in events:
-        pass
+    guard_sleeps = process_raw_events(events)
+
+    guard, total_minutes, best_minute = find_best_guard(guard_sleeps)
+    print(f'Best guard is {guard}, because he slept {total_minutes} in total and most on minute {best_minute}.')
+
+    return guard.gid * best_minute
 
 
-    # print(f'Loaded {len(claims)} claims; the canvas has size {size_x}x{size_y}.')
+def main():
+    print(f'Answer is {day_4()}.')
 
-    # too_occupied = SquareBySquareOverclaimedCounter(size_x, size_y, optimize_claims(claims)).count_too_occupied()
-    # too_occupied = IterateClaimsOverclaimedCounter(size_x, size_y, optimize_claims(claims)).count_too_occupied()
 
-    # return too_occupied
-    pass
+if __name__ == '__main__':
+    main()

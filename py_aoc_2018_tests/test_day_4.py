@@ -6,7 +6,8 @@ from datetime import date, datetime
 import pytest
 
 from py_aoc_2018.commons import stream_lines_as_str
-from py_aoc_2018.day_4 import Guard, RawEvent, Sleep, process_raw_events, process_str_events
+from py_aoc_2018.day_4 import Guard, RawEvent, Sleep, calculate_weakness, process_raw_events, process_str_events
+from py_aoc_2018.day_4 import find_best_guard
 
 
 class TestSleep(unittest.TestCase):
@@ -163,7 +164,7 @@ class TestGuard(unittest.TestCase):
 
 
 class TestDay4(unittest.TestCase):
-    def test(self):
+    def test_process_raw_events(self):
         r1 = RawEvent.from_string('[1518-11-01 00:00] Guard #10 begins shift')
         r2 = RawEvent.from_string('[1518-11-01 00:05] falls asleep')
         r3 = RawEvent.from_string('[1518-11-01 00:25] wakes up')
@@ -190,6 +191,39 @@ class TestDay4(unittest.TestCase):
         d[g999] = []
 
         assert res == d
+
+    def test_calculate_weakness(self):
+        s1 = Sleep(date(1518, 11, 1), 5, 25)
+        s2 = Sleep(date(1518, 11, 1), 30, 55)
+        s3 = Sleep(date(1518, 11, 3), 40, 50)
+
+        assert (55, 40) == calculate_weakness([s1, s2, s3])
+
+    def test_find_best_guard(self):
+        data = """
+[1518-11-01 00:00] Guard #10 begins shift
+[1518-11-01 00:05] falls asleep
+[1518-11-01 00:25] wakes up
+[1518-11-01 00:30] falls asleep
+[1518-11-01 00:55] wakes up
+[1518-11-01 23:58] Guard #99 begins shift
+[1518-11-02 00:40] falls asleep
+[1518-11-02 00:50] wakes up
+[1518-11-03 00:05] Guard #10 begins shift
+[1518-11-03 00:24] falls asleep
+[1518-11-03 00:29] wakes up
+[1518-11-04 00:02] Guard #99 begins shift
+[1518-11-04 00:36] falls asleep
+[1518-11-04 00:46] wakes up
+[1518-11-05 00:03] Guard #99 begins shift
+[1518-11-05 00:45] falls asleep
+[1518-11-05 00:55] wakes up
+        """
+
+        stream = io.StringIO(data)
+        sorted_events = process_str_events(stream_lines_as_str(stream))
+        guard_sleeps = process_raw_events(sorted_events)
+        assert (Guard(10), 50, 24) == find_best_guard(guard_sleeps)
 
 
 if __name__ == '__main__':
