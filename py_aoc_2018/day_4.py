@@ -157,9 +157,16 @@ def process_raw_events(events: List[RawEvent]) -> defaultdict[Guard, List[Sleep]
     return guard_sleeps
 
 
-def calculate_weakness(sleeps: List[Sleep]) -> Tuple[int, Union[int, None]]:
+def calculate_weakness(sleeps: List[Sleep]) -> Tuple[int, Union[int, None], int]:
+    """
+    Calculate weakness from guard's sleep record.
+
+    :param sleeps: List[Sleep]
+    :return: Tuple[int, Union[int, None], int] Total minutes slept, minute slept most, number of times minute slept.
+    """
     total_minutes = 0
     favourite_minute = None
+    favourite_minute_count = 0
 
     c = Counter()
 
@@ -169,41 +176,59 @@ def calculate_weakness(sleeps: List[Sleep]) -> Tuple[int, Union[int, None]]:
 
     most_common = c.most_common(1)
     if most_common:
-        favourite_minute = most_common.pop()[0]
+        favourite_minute, favourite_minute_count = most_common.pop()
 
-    return total_minutes, favourite_minute
+    return total_minutes, favourite_minute, favourite_minute_count
 
 
-def find_best_guard(guard_sleeps: defaultdict[Guard, List[Sleep]]) -> Tuple[Guard, int, int]:
+def find_best_guard(
+        guard_sleeps: defaultdict[Guard, List[Sleep]],
+        alternative_strategy: bool = False) -> Tuple[Guard, int, int, int]:
     total_minutes = 0
     best_guard = None
     best_minute = 0
+    best_minute_count = 0
 
     for guard, sleeps in guard_sleeps.items():
-        minutes, minute = calculate_weakness(sleeps)
-        if minutes > total_minutes:
-            total_minutes = minutes
-            best_guard = guard
-            best_minute = minute
+        minutes, minute, minute_c = calculate_weakness(sleeps)
+        if alternative_strategy:
+            if minute_c > best_minute_count:
+                total_minutes = minutes
+                best_guard = guard
+                best_minute = minute
+                best_minute_count = minute_c
 
-    return best_guard, total_minutes, best_minute
+        else:
+            if minutes > total_minutes:
+                total_minutes = minutes
+                best_guard = guard
+                best_minute = minute
+                best_minute_count = minute_c
+
+    return best_guard, total_minutes, best_minute, best_minute_count
 
 
-def day_4() -> int:
+def day_4() -> Tuple[int, int]:
     with open(get_input_file_path(4), 'r') as f:
         events = stream_lines_as_str(f)
         events = process_str_events(events)
 
     guard_sleeps = process_raw_events(events)
 
-    guard, total_minutes, best_minute = find_best_guard(guard_sleeps)
-    print(f'Best guard is {guard}, because he slept {total_minutes} in total and most on minute {best_minute}.')
+    guard, total_minutes, best_minute, best_minute_count = find_best_guard(guard_sleeps)
+    res_1 = guard.gid * best_minute
+    print(f'The Best guard is {guard}, because he slept {total_minutes} in total and most on minute {best_minute}.')
 
-    return guard.gid * best_minute
+    guard, total_minutes, best_minute, best_minute_count = find_best_guard(guard_sleeps, True)
+    res_2 = guard.gid * best_minute
+    print(f'Alternatively {guard} is a good choice, because he slept {best_minute_count}x on minute {best_minute}.')
+
+    return res_1, res_2
 
 
 def main():
-    print(f'Answer is {day_4()}.')
+    res_1, res_2 = day_4()
+    print(f'Answer is {res_1}, alternatively {res_2}.')
 
 
 if __name__ == '__main__':

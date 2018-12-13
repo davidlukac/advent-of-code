@@ -197,7 +197,7 @@ class TestDay4(unittest.TestCase):
         s2 = Sleep(date(1518, 11, 1), 30, 55)
         s3 = Sleep(date(1518, 11, 3), 40, 50)
 
-        assert (55, 40) == calculate_weakness([s1, s2, s3])
+        assert (55, 40, 2) == calculate_weakness([s1, s2, s3])
 
     def test_find_best_guard(self):
         data = """
@@ -223,7 +223,8 @@ class TestDay4(unittest.TestCase):
         stream = io.StringIO(data)
         sorted_events = process_str_events(stream_lines_as_str(stream))
         guard_sleeps = process_raw_events(sorted_events)
-        assert (Guard(10), 50, 24) == find_best_guard(guard_sleeps)
+        assert (Guard(10), 50, 24, 2) == find_best_guard(guard_sleeps)
+        assert (Guard(99), 30, 45, 3) == find_best_guard(guard_sleeps, True)
 
 
 if __name__ == '__main__':
