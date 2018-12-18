@@ -4,7 +4,7 @@ import unittest
 import pytest
 
 from py_aoc_2018.commons import stream_lines_as_str
-from py_aoc_2018.day_6 import read_points, Point, calculate_difference, find_corners
+from py_aoc_2018.day_6 import read_points, Point, calculate_distance, find_corners
 
 
 class TestPoint(unittest.TestCase):
@@ -12,8 +12,8 @@ class TestPoint(unittest.TestCase):
         assert Point.from_string('1,1') == Point(1, 1)
 
     def test_difference(self):
-        assert calculate_difference(Point(1, 1), Point(2, 1)) == 1
-        assert calculate_difference(Point(1, 1), Point(2, 2)) == 2
+        assert calculate_distance(Point(1, 1), Point(2, 1)) == 1
+        assert calculate_distance(Point(1, 1), Point(2, 2)) == 2
 
     def test_corners(self):
         assert find_corners([
