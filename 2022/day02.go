@@ -92,7 +92,10 @@ func main() {
 	var game2 []*Round
 	score = 0
 
-	inputFile.Seek(0, io.SeekStart)
+	_, err = inputFile.Seek(0, io.SeekStart)
+	if err != nil {
+		panic(err)
+	}
 	scanner = bufio.NewScanner(inputFile)
 	for scanner.Scan() {
 		line := scanner.Text()
