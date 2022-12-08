@@ -2,38 +2,14 @@ package main
 
 import (
 	"bufio"
-	"errors"
-	"fmt"
-	"os"
+	"github.com/davidlukac/advent-of-code/2022/library"
 	"sort"
 	"strconv"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		panic("input file not provided")
-	}
-
-	inputFilePath := os.Args[1]
-	stat, err := os.Stat(inputFilePath)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			panic(fmt.Sprintf("file %s doens't exist", inputFilePath))
-		} else {
-			panic(fmt.Sprintf("error: %v", err))
-		}
-	}
-	if stat.IsDir() {
-		panic("provided path is a directory")
-	}
-
-	inputFile, err := os.Open(inputFilePath)
-	defer func(inputFile *os.File) {
-		err := inputFile.Close()
-		if err != nil {
-			panic("failed to close input file")
-		}
-	}(inputFile)
+	inputFile, closeFn := library.OpenFileFromArgs()
+	defer closeFn()
 
 	var elves []int
 	elves = append(elves, 0)
