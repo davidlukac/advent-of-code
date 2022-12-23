@@ -4,11 +4,18 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/davidlukac/advent-of-code/2022/library"
+	"math"
 	"reflect"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
+)
+
+const (
+	DiskSize    = 70000000
+	SpaceNeeded = 30000000
 )
 
 type ElfCmd struct {
@@ -90,8 +97,36 @@ func main() {
 
 	sum, _ := fs.FilterAndCalculateTotalSize(0, 100000)
 	println(sum)
+
+	dirToDelete := fs.FindSmallestDirToDelete(SpaceNeeded - (DiskSize - fs.Root.size))
+	println(dirToDelete.size)
 }
 
+func (efs *ElfFilesystem) FindSmallestDirToDelete(neededSpace int) *DirFs {
+	_, dirs := efs.FilterAndCalculateTotalSize(0, math.MaxInt)
+
+	sort.Slice(dirs, func(i, j int) bool {
+		return dirs[i].size < dirs[j].size
+	})
+
+	for _, d := range dirs {
+		if d.size >= neededSpace {
+			return d
+		}
+	}
+
+	return nil
+}
+
+func (efs *ElfFilesystem) GetMapOfDirsBySize() map[*DirFs]int {
+	m := map[*DirFs]int{}
+
+	return m
+}
+
+// FilterAndCalculateTotalSize traverses all directories recursively, calculates their size, filters out directories
+// that are about of bounds of min and max (including) and returns total sum of the sizes and list of directories that
+// matched min & max criteria.
 func (efs *ElfFilesystem) FilterAndCalculateTotalSize(min, max int) (int, []*DirFs) {
 	ch := make(chan *DirFs)
 
