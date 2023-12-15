@@ -1,0 +1,16 @@
+{
+  "autoload": {
+    "psr-4": {
+      "AdventOfCode\\Year2023\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "AdventOfCode\\Year2023\\Tests\\": "tests/"
+    }
+  },
+  "require-dev": {
+    "laravel/pint": "^1.13",
+    "phpunit/phpunit": "^10"
+  }
+}

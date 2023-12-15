@@ -1,0 +1,5 @@
+lint:
+    ./vendor/bin/pint
+
+test:
+	./vendor/bin/phpunit tests
