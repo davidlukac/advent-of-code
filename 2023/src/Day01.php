@@ -29,9 +29,6 @@ class Day01 extends Base
     /**
      * Extract first and last digit as either \d or spelled ('one', 'two', 'three', ...) form. Overlapping strings are
      * valid as well. Otherwise, return 0.
-     *
-     * @param string $s
-     * @return int
      */
     public function extractWordDigits(string $s): int
     {
@@ -54,6 +51,9 @@ class Day01 extends Base
         return $result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function calculateFirstStar(): int
     {
         $sum = 0;
@@ -65,6 +65,9 @@ class Day01 extends Base
         return $sum;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function calculateSecondStar(): int
     {
         $sum = 0;
