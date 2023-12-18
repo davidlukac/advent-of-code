@@ -5,17 +5,13 @@ namespace AdventOfCode\Year2023;
 use Generator;
 use SplFileObject;
 
-/**
- * @property string $f
- */
 abstract class Base
 {
     /**
      * @param  string  $f Path to input file.
      */
-    public function __construct(string $f)
+    public function __construct(private readonly string $f)
     {
-        $this->f = $f;
     }
 
     /**

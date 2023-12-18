@@ -2,6 +2,9 @@
 
 namespace AdventOfCode\Year2023\utils\digits;
 
+/**
+ * @codeCoverageIgnore
+ */
 abstract class Digit
 {
     public const INT = self::INT;

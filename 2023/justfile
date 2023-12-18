@@ -2,4 +2,4 @@ lint:
     ./vendor/bin/pint
 
 test:
-	./vendor/bin/phpunit tests
+	./vendor/bin/phpunit --coverage-text

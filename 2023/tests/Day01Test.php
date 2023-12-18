@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace AdventOfCode\Year2023\Tests;
 
 use AdventOfCode\Year2023\Day01;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 
+#[CoversClass(Day01::class)]
 final class Day01Test extends TestCase
 {
     public final const LINES_ONE = [

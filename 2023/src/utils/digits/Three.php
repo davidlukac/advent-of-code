@@ -2,6 +2,9 @@
 
 namespace AdventOfCode\Year2023\utils\digits;
 
+/**
+ * @codeCoverageIgnore
+ */
 class Three extends Digit
 {
     public final const INT = 3;

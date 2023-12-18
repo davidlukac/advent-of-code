@@ -4,9 +4,11 @@ namespace AdventOfCode\Year2023\Tests\utils;
 
 use AdventOfCode\Year2023\exceptions\NotDigitException;
 use AdventOfCode\Year2023\utils\DigitFactory;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
+#[CoversClass(DigitFactory::class)]
 class DigitFactoryTest extends TestCase
 {
     public static function parseProvider(): array
