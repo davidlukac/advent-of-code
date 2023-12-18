@@ -23,4 +23,12 @@
             <directory>src</directory>
         </include>
     </source>
+
+    <coverage>
+        <report>
+            <html outputDirectory="htmlcov/"/>
+            <text outputFile=".coverage.txt"/>
+        </report>
+    </coverage>
+
 </phpunit>

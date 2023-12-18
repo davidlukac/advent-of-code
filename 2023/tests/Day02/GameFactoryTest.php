@@ -32,4 +32,20 @@ final class GameFactoryTest extends TestCase
     {
         $this->assertSame($expectedId, GameFactory::parse($line)->id);
     }
+
+    public static function badLines(): array
+    {
+        return [
+            ['foo', "Line 'foo' does not contain two parts separated by ':'!"],
+            ['foo:bar', "Line 'foo:bar' does not contain 'Game' with ID as expected!"],
+        ];
+    }
+
+    #[DataProvider('badLines')]
+    public function testParseExceptions(string $line, string $exceptionMessage)
+    {
+        $this->expectException(ParseException::class);
+        $this->expectExceptionMessage($line);
+        GameFactory::parse($line);
+    }
 }

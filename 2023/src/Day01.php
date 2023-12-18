@@ -5,7 +5,9 @@ namespace AdventOfCode\Year2023;
 use AdventOfCode\Year2023\exceptions\NotDigitException;
 use AdventOfCode\Year2023\utils\DigitFactory;
 
+// @codeCoverageIgnoreStart
 require __DIR__.'/../vendor/autoload.php';
+// @codeCoverageIgnoreEnd
 
 class Day01 extends Base
 {
@@ -29,6 +31,8 @@ class Day01 extends Base
     /**
      * Extract first and last digit as either \d or spelled ('one', 'two', 'three', ...) form. Overlapping strings are
      * valid as well. Otherwise, return 0.
+     *
+     * @throws NotDigitException
      */
     public function extractWordDigits(string $s): int
     {
@@ -38,12 +42,8 @@ class Day01 extends Base
         $matched = preg_match_all('/(?=(one|two|three|four|five|six|seven|eight|nine|\d))/', $s, $matches);
 
         if ($matched && $matched >= 1) {
-            try {
-                $firstDigit = DigitFactory::parse(reset($matches[1]))::INT;
-                $lastDigit = DigitFactory::parse(end($matches[1]))::INT;
-            } catch (NotDigitException $e) {
-                exit('Digit parsing went wrong: '.$e);
-            }
+            $firstDigit = DigitFactory::parse(reset($matches[1]))::INT;
+            $lastDigit = DigitFactory::parse(end($matches[1]))::INT;
 
             $result = (int) "{$firstDigit}{$lastDigit}";
         }
@@ -80,7 +80,9 @@ class Day01 extends Base
     }
 }
 
+// @codeCoverageIgnoreStart
 if (! debug_backtrace()) {
     $d = new Day01('inputs/01.txt');
     $d->execute();
 }
+// @codeCoverageIgnoreEnd

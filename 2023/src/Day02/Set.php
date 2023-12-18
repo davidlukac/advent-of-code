@@ -2,6 +2,9 @@
 
 namespace AdventOfCode\Year2023\Day02;
 
+/**
+ * @codeCoverageIgnore
+ */
 class Set
 {
     public final const RED = 'red';
@@ -12,7 +15,10 @@ class Set
 
     public final const COLORS = [self::RED, self::GREEN, self::BLUE];
 
-    public function __construct(public readonly int $red, public readonly int $green, public readonly int $blue)
-    {
+    public function __construct(
+        public readonly ?int $red = 0,
+        public readonly ?int $green = 0,
+        public readonly ?int $blue = 0,
+    ) {
     }
 }
