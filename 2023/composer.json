@@ -13,5 +13,9 @@
     "laravel/pint": "^1.13",
     "phpunit/phpunit": "^10",
     "phpunit/php-code-coverage": "^10.1"
+  },
+  "require": {
+    "ext-mbstring": "*",
+    "ext-ctype": "*"
   }
 }
