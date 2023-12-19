@@ -22,6 +22,17 @@ class Schematic
      */
     private array $occupancy = [];
 
+    private const RELATIVE_SURROUNDING_COORDINATES = [
+        [-1, -1],
+        [-1, 0],
+        [-1, 1],
+        [0, -1],
+        [0, 1],
+        [1, -1],
+        [1, 0],
+        [1, 1],
+    ];
+
     /**
      * @throws InvalidSchematicsException
      */
@@ -85,28 +96,50 @@ class Schematic
         $engineParts = [];
 
         foreach ($this->symbols as $s) {
-            $checkPositions = [
-                [-1, -1],
-                [-1, 0],
-                [-1, 1],
-                [0, -1],
-                [0, 1],
-                [1, -1],
-                [1, 0],
-                [1, 1],
-            ];
-            foreach ($checkPositions as $pos) {
-                $occupant = $this->occupancy[$s->position->line + $pos[0]][$s->position->x + $pos[1]] ?? null;
-                if (($occupant) and ($occupant instanceof SchematicNumber)) {
-                    $occupant->setEnginePart();
-                    $engineParts[$occupant->getId()] = $occupant;
-                }
+            $engineParts = array_merge($engineParts, $this->findSurroundingEngineParts($s));
+        }
+
+        return $engineParts;
+    }
+
+    /**
+     * @return Gear[]
+     */
+    public function findGears(): array
+    {
+        $gears = [];
+
+        foreach ($this->symbols as $s) {
+            // We're looking only for gears: '*'.
+            if ($s->value != Gear::SYMBOL) {
+                continue;
+            }
+
+            $localOccupants = $this->findSurroundingEngineParts($s);
+
+            if (count($localOccupants) == 2) {
+                $gears[] = new Gear($s, ...array_values($localOccupants));
             }
         }
 
-        $totalOccupants = 0;
-        foreach ($this->occupancy as $line) {
-            $totalOccupants += count($line);
+        return $gears;
+    }
+
+    /**
+     * Identify engine parts surrounding given symbol, set them as such and return them in an array with ID as key.
+     *
+     * @return SchematicNumber[]
+     */
+    private function findSurroundingEngineParts(Symbol $s): array
+    {
+        $engineParts = [];
+
+        foreach (self::RELATIVE_SURROUNDING_COORDINATES as $pos) {
+            $occupant = $this->occupancy[$s->position->line + $pos[0]][$s->position->x + $pos[1]] ?? null;
+            if (($occupant) and ($occupant instanceof SchematicNumber)) {
+                $occupant->setEnginePart();
+                $engineParts[$occupant->getId()] = $occupant;
+            }
         }
 
         return $engineParts;

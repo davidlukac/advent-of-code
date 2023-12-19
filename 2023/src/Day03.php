@@ -4,7 +4,6 @@ namespace AdventOfCode\Year2023;
 
 use AdventOfCode\Year2023\Day03\Schematic;
 use AdventOfCode\Year2023\Day03\SchematicFactory;
-use AdventOfCode\Year2023\Day03\SchematicNumber;
 use AdventOfCode\Year2023\exceptions\InvalidSchematicsException;
 
 // @codeCoverageIgnoreStart
@@ -29,8 +28,6 @@ class Day03 extends Base
             $lineNumber++;
         }
 
-
-
         foreach ($schematic->findEngineParts() as $enginePart) {
             $sum += $enginePart->value;
         }
@@ -40,10 +37,25 @@ class Day03 extends Base
 
     /**
      * {@inheritDoc}
+     *
+     * @throws InvalidSchematicsException
      */
     public function calculateSecondStar(): int
     {
-        return 0;
+        $sum = 0;
+        $lineNumber = 0;
+        $schematic = new Schematic();
+
+        foreach ($this->getLineData() as $line) {
+            $schematic->mergeSchematicPartial(SchematicFactory::parse($line, $lineNumber), $lineNumber);
+            $lineNumber++;
+        }
+
+        foreach ($schematic->findGears() as $gear) {
+            $sum += $gear->getRatio();
+        }
+
+        return $sum;
     }
 }
 

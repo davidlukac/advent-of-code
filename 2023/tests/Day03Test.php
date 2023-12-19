@@ -111,8 +111,30 @@ class Day03Test extends TestCase
         $this->assertSame($sum, $res);
     }
 
-    //    public function testCalculateSecondStar()
-    //    {
-    //
-    //    }
+    public static function getDataStarTwo(): array
+    {
+        return [
+            [self::TEST_LINES, 467835],
+        ];
+    }
+
+    /**
+     * @throws InvalidSchematicsException
+     * @throws Exception
+     */
+    #[DataProvider('getDataStarTwo')]
+    public function testCalculateSecondStar(array $lines, int $sum)
+    {
+        $d = $this->createPartialMock(Day03::class, ['getLineData']);
+        $d->method('getLineData')
+            ->willReturn((function () use ($lines) {
+                foreach ($lines as $line) {
+                    yield $line;
+                }
+            })());
+
+        $res = $d->calculateSecondStar();
+
+        $this->assertSame($sum, $res);
+    }
 }

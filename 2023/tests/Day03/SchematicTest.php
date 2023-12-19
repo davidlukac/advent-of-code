@@ -180,4 +180,37 @@ class SchematicTest extends TestCase
             "{$l}:{$x}" => new SchematicNumber($n, new Position($l, $x), true),
         ], $sch->findEngineParts());
     }
+
+    public static function findGearsData(): array
+    {
+        return [
+            [['*', 1, 1], [[2, 1, 0], [3, 1, 2]], 6],
+            [['-', 1, 1], [[2, 1, 0], [3, 1, 2]], null],
+            [['*', 1, 1], [[2, 1, 0]], null],
+            [['*', 1, 1], [[2, 1, 0], [3, 1, 2], [4, 0, 1]], null],
+        ];
+    }
+
+    /**
+     * @throws InvalidSchematicsException
+     */
+    #[DataProvider('findGearsData')]
+    public function testFindGears(array $s, array $numbers, ?int $ratio)
+    {
+        $sch = new Schematic();
+        $sch->addSchematicPart(new Symbol($s[0], new Position($s[1], $s[2])));
+
+        foreach ($numbers as $n) {
+            $sch->addSchematicPart(new SchematicNumber($n[0], new Position($n[1], $n[2])));
+        }
+
+        $gears = $sch->findGears();
+        $first = reset($gears);
+
+        if ($first) {
+            $this->assertSame($ratio, $first->getRatio());
+        } else {
+            $this->assertSame($ratio, null);
+        }
+    }
 }
