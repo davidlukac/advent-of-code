@@ -2,56 +2,57 @@
 
 namespace AdventOfCode\Year2023\Day05;
 
-use OutOfRangeException;
+use InvalidArgumentException;
 
 class Range
 {
-    private readonly int $diff;
+    public readonly int $length;
 
-    private readonly int $sourceEnd;
-
-    public function __construct(
-        public readonly int $sourceStart,
-        public readonly int $destStart,
-        public readonly int $rangeLength,
-    ) {
-        $this->diff = $this->destStart - $this->sourceStart;
-        $this->sourceEnd = $this->sourceStart + $this->rangeLength - 1;
+    public function __construct(public readonly int $start, public readonly int $end)
+    {
+        if ($this->start <= $this->end) {
+            $this->length = $this->end - $this->start + 1;
+        } else {
+            $this->length = -($this->start - $this->end + 1);
+        }
     }
 
     /**
-     * Map source ID to destination ID.
-     *
-     * @throws OutOfRangeException
+     * Construct {@see Range} from start index and length.
      */
-    public function get(int $source): int
+    public static function fromLength(int $start, int $length): Range
     {
-        if (($source < $this->sourceStart) or ($source > $this->sourceEnd)) {
-            throw new OutOfRangeException();
+        if ($length > 0) {
+            return new static($start, $start + $length - 1);
+        } elseif ($length < 0) {
+            return new static($start, $start + $length + 1);
+        } else {
+            throw new InvalidArgumentException('Length can not be zero!');
+        }
+    }
+
+    /**
+     * Check if given source is within this range.
+     */
+    public function contains(int $needle): bool
+    {
+        $contains = true;
+
+        if ($this->start <= $this->end) {
+            if (($needle < $this->start) or ($needle > $this->end)) {
+                $contains = false;
+            }
+        } else {
+            if (($needle > $this->start) or ($needle < $this->end)) {
+                $contains = false;
+            }
         }
 
-        return $source + $this->diff;
+        return $contains;
     }
 
-    /**
-     * Map source ID to destination ID. Return null if index is out of bounds.
-     */
-    public function getDefault(int $source): ?int
+    public function __toString(): string
     {
-        $destination = $source + $this->diff;
-
-        if (($source < $this->sourceStart) or ($source > $this->sourceEnd)) {
-            $destination = null;
-        }
-
-        return $destination;
-    }
-
-    /**
-     * String representation of source range as 'SOURCE_START:SOURCE_END'.
-     */
-    public function getSourceRangeStr(): string
-    {
-        return "{$this->sourceStart}:{$this->sourceEnd}";
+        return "Range {$this->start}->{$this->end} (length: {$this->length})";
     }
 }

@@ -93,7 +93,8 @@ class Day03Test extends TestCase
     }
 
     /**
-     * @throws Exception|InvalidSchematicsException
+     * @throws Exception
+     * @throws InvalidSchematicsException
      */
     #[DataProvider('getData')]
     public function testCalculateFirstStar(array $lines, int $sum)

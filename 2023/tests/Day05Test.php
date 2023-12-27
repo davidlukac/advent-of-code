@@ -3,6 +3,7 @@
 namespace AdventOfCode\Year2023\Tests;
 
 use AdventOfCode\Year2023\Day05;
+use AdventOfCode\Year2023\exceptions\InvalidMapTypeException;
 use AdventOfCode\Year2023\exceptions\ParseException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -56,7 +57,9 @@ class Day05Test extends TestCase
     }
 
     /**
-     * @throws Exception|ParseException
+     * @throws Exception
+     * @throws InvalidMapTypeException
+     * @throws ParseException
      */
     #[DataProvider('firstData')]
     public function testCalculateFirstStar(array $lines, $expectedResult)
@@ -74,8 +77,31 @@ class Day05Test extends TestCase
         $this->assertSame($expectedResult, $result);
     }
 
-    public function testCalculateSecondStar()
+    public static function secondData(): array
     {
+        return [
+            [self::TEST_LINES_1, 46],
+        ];
+    }
 
+    /**
+     * @throws Exception
+     * @throws InvalidMapTypeException
+     * @throws ParseException
+     */
+    #[DataProvider('secondData')]
+    public function testCalculateSecondStar(array $lines, $expectedResult)
+    {
+        $d = $this->createPartialMock(Day05::class, ['getLineData']);
+        $d->method('getLineData')
+            ->willReturn((function () use ($lines) {
+                foreach ($lines as $line) {
+                    yield $line;
+                }
+            })());
+
+        $result = $d->calculateSecondStar();
+
+        $this->assertSame($expectedResult, $result);
     }
 }

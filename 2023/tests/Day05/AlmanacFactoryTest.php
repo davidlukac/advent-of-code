@@ -22,8 +22,8 @@ class AlmanacFactoryTest extends TestCase
             ['', AF::STG_UNKNOWN, AF::STG_UNKNOWN, []],
             ['', AF::STG_MAPS, AF::STG_UNKNOWN, []],
             ['foo', AF::STG_START, AF::STG_UNKNOWN, []],
-            ['  SeEds: 1 2 3 ', AF::STG_START, AF::STG_MAPS, [1, 2, 3]],
-            ['  SeEds:    1  234   2 3      333        ', AF::STG_START, AF::STG_MAPS, [1, 234, 2, 3, 333]],
+            ['  SeEds: 1 2 3 4', AF::STG_START, AF::STG_MAPS, [1, 2, 3, 4]],
+            ['  SeEds:    1  234   2 3      333     444     ', AF::STG_START, AF::STG_MAPS, [1, 234, 2, 3, 333, 444]],
         ];
     }
 

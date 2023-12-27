@@ -14,7 +14,8 @@ class AlmanacFactory
     public const STG_UNKNOWN = 'unknown';
 
     /**
-     * @throws ParseException|InvalidMapTypeException
+     * @throws InvalidMapTypeException
+     * @throws ParseException
      */
     public static function parse(string $line, Almanac &$almanac, string $stage): string
     {
@@ -59,7 +60,7 @@ class AlmanacFactory
         ) {
             preg_match('/^(\d+)\s+(\d+)\s+(\d+)$/', $sanitized, $matches);
             [$destination, $source, $range] = array_map('intval', array_slice($matches, 1));
-            $almanac->getMap($stage)->addMapRange(new Range($source, $destination, $range));
+            $almanac->getMap($stage)->addMapping(new Mapping($source, $destination, $range));
 
             return $stage;
         }

@@ -3,7 +3,7 @@
 namespace AdventOfCode\Year2023\Tests\Day05;
 
 use AdventOfCode\Year2023\Day05\Range;
-use OutOfRangeException;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -11,90 +11,74 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(Range::class)]
 class RangeTest extends TestCase
 {
-    public static function constructData(): array
+    public static function data(): array
     {
+        // int $start, int $end, int $length
         return [
-            [[50, 98, 2]],
-            [[52, 50, 48]],
+            [1, 10, 10, 'Range 1->10 (length: 10)'],
+            [10, 1, -10, 'Range 10->1 (length: -10)'],
+            [-10, -1, 10, 'Range -10->-1 (length: 10)'],
+            [-1, -10, -10, 'Range -1->-10 (length: -10)'],
+            [-5, 4, 10, 'Range -5->4 (length: 10)'],
+            [4, -5, -10, 'Range 4->-5 (length: -10)'],
+            [1, 1, 1, 'Range 1->1 (length: 1)'],
+            [-1, -1, 1, 'Range -1->-1 (length: 1)'],
         ];
     }
 
-    #[DataProvider('constructData')]
-    public function testConstruct(array $range)
+    #[DataProvider('data')]
+    public function testFromLength(int $start, int $expectedEnd, int $length, string $representation)
     {
-        $r = new Range(...$range);
-        $this->assertSame($range[0], $r->sourceStart);
-        $this->assertSame($range[1], $r->destStart);
-        $this->assertSame($range[2], $r->rangeLength);
+        $r = Range::fromLength($start, $length);
+        $this->assertSame($expectedEnd, $r->end);
+        $this->assertSame($representation, $r->__toString());
     }
 
-    public static function mapData(): array
+    #[DataProvider('data')]
+    public function testConstruct(int $start, int $end, int $expectedLength, string $representation)
     {
-        // array $construct, array $cases
+        $r = new Range($start, $end);
+        $this->assertSame($expectedLength, $r->length);
+        $this->assertSame($representation, $r->__toString());
+    }
+
+    public function testFailedFromLength()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Length can not be zero!');
+        Range::fromLength(1, 0);
+    }
+
+    public static function containsData(): array
+    {
         return [
-            [[1, 11, 10], [[1, 11], [5, 15]]],
-            [[11, 1, 10], [[11, 1], [15, 5]]],
-            [[-1, -11, 10], [[-1, -11], [1, -9]]],
-            [[-11, -21, 10], [[-9, -19]]],
+            [10, 20, 9, false],
+            [10, 20, 10, true],
+            [10, 20, 15, true],
+            [10, 20, 20, true],
+            [10, 20, 21, false],
+            [-10, -20, -9, false],
+            [-10, -20, -10, true],
+            [-10, -20, -15, true],
+            [-10, -20, -20, true],
+            [-10, -20, -21, false],
+            [-5, 4, -6, false],
+            [-5, 4, -5, true],
+            [-5, 4, 0, true],
+            [-5, 4, 4, true],
+            [-5, 4, 5, false],
+            [4, -5, -6, false],
+            [4, -5, -5, true],
+            [4, -5, 0, true],
+            [4, -5, 4, true],
+            [4, -5, 5, false],
         ];
     }
 
-    #[DataProvider('mapData')]
-    public function testMap(array $construct, array $cases)
+    #[DataProvider('containsData')]
+    public function testContains(int $start, int $end, int $test, bool $expectedResult)
     {
-        $r = new Range(...$construct);
-        foreach ($cases as $case) {
-            $this->assertSame($case[1], $r->get($case[0]));
-        }
-    }
-
-    public static function sourceRangeStrData(): array
-    {
-        return [
-            [[1, 11, 10], '1:10'],
-            [[11, 1, 10], '11:20'],
-            [[-1, -11, 10], '-1:8'],
-            [[-11, -21, 2], '-11:-10'],
-        ];
-    }
-
-    #[DataProvider('sourceRangeStrData')]
-    public function testSourceRangeStr(array $construct, string $expected)
-    {
-        $r = new Range(...$construct);
-        $this->assertSame($expected, $r->getSourceRangeStr());
-    }
-
-    public static function outOfBoundsData(): array
-    {
-        return [
-            [[1, 11, 10], [0, 11]],
-            [[-10, 11, 2], [-11, -12]],
-        ];
-    }
-
-    #[DataProvider('outOfBoundsData')]
-    public function testMapException(array $construct, array $cases)
-    {
-        $r = new Range(...$construct);
-
-        foreach ($cases as $case) {
-            try {
-                $r->get($case);
-                $this->fail('Exception was not thrown!');
-            } catch (OutOfRangeException $e) {
-                $this->assertInstanceOf(OutOfRangeException::class, $e);
-            }
-        }
-    }
-
-    #[DataProvider('outOfBoundsData')]
-    public function testMapDefault(array $construct, array $cases)
-    {
-        $r = new Range(...$construct);
-
-        foreach ($cases as $case) {
-            $this->assertSame(null, $r->getDefault($case));
-        }
+        $r = new Range($start, $end);
+        $this->assertSame($expectedResult, $r->contains($test));
     }
 }
